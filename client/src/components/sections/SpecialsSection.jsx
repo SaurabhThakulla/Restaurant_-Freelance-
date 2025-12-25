@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { menuItems } from "@/data/menu";
 import { motion } from "framer-motion";
+import { fadeUpSmooth, staggerContainer } from "@/lib/animations";
 
 const container = {
   hidden: {},
@@ -36,26 +37,20 @@ export default function SpecialsSection() {
 
       {/* Cards */}
       <motion.div
-        className="grid md:grid-cols-3 gap-6"
-        variants={container}
+        variants={staggerContainer}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true }}
+        viewport={{ once: true, margin: "-100px" }}
+        className="grid md:grid-cols-3 gap-6"
       >
         {menuItems.map((item) => (
           <motion.div
             key={item.id}
-            variants={itemAnim}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
+            variants={fadeUpSmooth}
+            whileHover={{ y: -6 }}
+            transition={{ type: "spring", stiffness: 120 }}
           >
-            <Card className="bg-zinc-900 border-zinc-800 h-full">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold">{item.name}</h3>
-                <p className="text-zinc-400 mt-2">{item.description}</p>
-                <p className="text-orange-400 font-bold mt-4">₹{item.price}</p>
-              </CardContent>
-            </Card>
+            {/* card */}
           </motion.div>
         ))}
       </motion.div>
