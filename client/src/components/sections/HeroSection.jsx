@@ -18,7 +18,7 @@ export default function HeroSection() {
       </motion.div>
 
       <motion.img
-        src="/assets/images/momo.jpg"
+        src="../../assets/images/momo.jpg"
         className="rounded-full shadow-2xl w-[360px] mx-auto"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
