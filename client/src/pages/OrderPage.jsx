@@ -1,5 +1,5 @@
-import SpecialsSection from "@/components/sections/SpecialsSection";
+import OrderList from "../components/sections/OrderList";
 
 export default function OrderPage() {
-  return <SpecialsSection />;
+  return <OrderList />;
 }
