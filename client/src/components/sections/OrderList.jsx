@@ -12,7 +12,6 @@ const BASE_PRICE = {
 };
 
 const MIN_ORDER_AMOUNT = 500;
-const WHATSAPP_NUMBER = "91XXXXXXXXXX";
 
 export default function OrderList() {
   const [type, setType] = useState({});
@@ -26,7 +25,7 @@ export default function OrderList() {
   }
 
   function sendToWhatsApp(cartItems, total) {
-    const PHONE = "919405711522"; // WhatsApp number (no +)
+    const PHONE = "919405711522";
 
     let message = `🛒 *Momo Order Details*%0A%0A`;
 
@@ -42,7 +41,7 @@ export default function OrderList() {
     message += `------------------------%0A%0A`;
 
     message += `📌 *Payment Details*%0A`;
-    message += `Please make payment to confirm your order:%0A`;
+    message += `Please make payment to confirm your order and also your payment screenshot:%0A`;
     message += `📞 *919405711522*%0A%0A`;
 
     message += `📍 *Delivery Location*%0A`;
@@ -54,32 +53,34 @@ export default function OrderList() {
   }
 
   function changeQty(item, delta, price, momoType, variant) {
+    const key = `${item.id}-${variant}`;
+
     setCart((prev) => {
-      const existing = prev[item.id];
+      const existing = prev[key];
       const newQty = (existing?.quantity || 0) + delta;
 
       if (newQty <= 0) {
         const copy = { ...prev };
-        delete copy[item.id];
+        delete copy[key];
         return copy;
       }
 
       return {
         ...prev,
-        [item.id]: {
+        [key]: {
           id: item.id,
           name: item.name,
-          quantity: newQty,
-          price,
-          momoType,
           variant,
+          momoType,
+          price,
+          quantity: newQty,
         },
       };
     });
   }
 
   const cartItems = Object.values(cart);
-  const total = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const total = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
   const canCheckout = total >= MIN_ORDER_AMOUNT;
 
   return (
@@ -102,9 +103,10 @@ export default function OrderList() {
           {menuItems.map((item) => {
             const selected = type[item.id] || "Steam";
             const momoType = getMomoType(item.name);
-            const isFried = selected === "Fried";
-            const price = BASE_PRICE[momoType] + (isFried ? 10 : 0);
-            const quantity = cart[item.id]?.quantity || 0;
+            const price =
+              BASE_PRICE[momoType] + (selected === "Fried" ? 10 : 0);
+
+            const quantity = cart[`${item.id}-${selected}`]?.quantity || 0;
 
             return (
               <motion.div key={item.id} variants={fadeUpSmooth}>
@@ -207,64 +209,36 @@ export default function OrderList() {
           </Card>
         </div>
       )}
+
       {openCart && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
           <div className="w-[70vw] h-[70vh] bg-zinc-900 rounded-2xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-white">Your Order</h2>
+
               <button
                 onClick={() => setOpenCart(false)}
-                className="text-zinc-400 hover:text-white"
+                className="text-zinc-400 hover:text-white text-xl"
               >
                 ✕
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2">
-              {cartItems.map((item) => (
+              {cartItems.map((item, i) => (
                 <div
-                  key={item.id}
-                  className="flex justify-between items-center py-4 border-b border-zinc-800"
+                  key={i}
+                  className="flex justify-between py-3 border-b border-zinc-800"
                 >
                   <div>
-                    <p className="text-white font-medium">{item.name}</p>
+                    <p className="text-white">{item.name}</p>
                     <p className="text-xs text-zinc-400">
                       {item.variant} · {item.momoType}
                     </p>
-                    <p className="text-orange-400">₹{item.price}</p>
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() =>
-                        changeQty(
-                          { id: item.id, name: item.name },
-                          -1,
-                          item.price,
-                          item.momoType,
-                          item.variant
-                        )
-                      }
-                      className="px-2 py-1 border border-zinc-700 rounded"
-                    >
-                      −
-                    </button>
-                    <span className="text-white">{item.quantity}</span>
-                    <button
-                      onClick={() =>
-                        changeQty(
-                          { id: item.id, name: item.name },
-                          1,
-                          item.price,
-                          item.momoType,
-                          item.variant
-                        )
-                      }
-                      className="px-2 py-1 border border-zinc-700 rounded"
-                    >
-                      +
-                    </button>
-                  </div>
+                  <p className="text-orange-400">
+                    ₹{item.price * item.quantity}
+                  </p>
                 </div>
               ))}
             </div>
