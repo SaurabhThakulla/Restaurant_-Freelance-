@@ -5,126 +5,286 @@ import { motion } from "framer-motion";
 import { fadeUpSmooth, staggerContainer } from "@/lib/animations";
 import momoImg from "@/assets/momo.jpg";
 
-/* PRICE CONFIG */
-const PRICE_MAP = {
-  Steam: {
-    Paneer: 50,
-    Soya: 40,
-    Veg: 30,
-  },
-  Fried: {
-    Paneer: 60,
-    Soya: 50,
-    Veg: 40,
-  },
+const BASE_PRICE = {
+  Veg: 30,
+  Soya: 40,
+  Paneer: 50,
 };
+
+const MIN_ORDER_AMOUNT = 500;
+const WHATSAPP_NUMBER = "91XXXXXXXXXX";
 
 export default function OrderList() {
   const [type, setType] = useState({});
+  const [cart, setCart] = useState({});
+  const [openCart, setOpenCart] = useState(false);
+
+  function getMomoType(name) {
+    if (name.includes("Paneer")) return "Paneer";
+    if (name.includes("Soya")) return "Soya";
+    return "Veg";
+  }
+
+  function sendToWhatsApp(cartItems, total) {
+    const PHONE = "919405711522"; // WhatsApp number (no +)
+
+    let message = `🛒 *Momo Order Details*%0A%0A`;
+
+    cartItems.forEach((item, i) => {
+      message += `${i + 1}. *${item.name}*%0A`;
+      message += `   ${item.variant} (${item.momoType})%0A`;
+      message += `   Quantity: ${item.quantity}%0A`;
+      message += `   Price: ₹${item.price * item.quantity}%0A%0A`;
+    });
+
+    message += `------------------------%0A`;
+    message += `💰 *Total Amount:* ₹${total}%0A`;
+    message += `------------------------%0A%0A`;
+
+    message += `📌 *Payment Details*%0A`;
+    message += `Please make payment to confirm your order:%0A`;
+    message += `📞 *919405711522*%0A%0A`;
+
+    message += `📍 *Delivery Location*%0A`;
+    message += `Please send your *live location* or *address* here.%0A%0A`;
+
+    message += `🙏 Thank you for ordering!`;
+
+    window.open(`https://wa.me/${PHONE}?text=${message}`, "_blank");
+  }
+
+  function changeQty(item, delta, price, momoType, variant) {
+    setCart((prev) => {
+      const existing = prev[item.id];
+      const newQty = (existing?.quantity || 0) + delta;
+
+      if (newQty <= 0) {
+        const copy = { ...prev };
+        delete copy[item.id];
+        return copy;
+      }
+
+      return {
+        ...prev,
+        [item.id]: {
+          id: item.id,
+          name: item.name,
+          quantity: newQty,
+          price,
+          momoType,
+          variant,
+        },
+      };
+    });
+  }
+
+  const cartItems = Object.values(cart);
+  const total = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const canCheckout = total >= MIN_ORDER_AMOUNT;
 
   return (
-    <section className="px-6 md:px-10 py-24 bg-[#0b0b0b] min-h-screen">
-      {/* TITLE */}
-      <motion.h2
-        className="text-3xl md:text-4xl font-bold mb-14 text-white text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        Specials Menu
-      </motion.h2>
+    <>
+      <section className="px-6 md:px-10 py-24 bg-[#0b0b0b] min-h-screen">
+        <motion.h2
+          className="text-3xl md:text-4xl font-bold mb-14 text-white text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          Specials Menu
+        </motion.h2>
 
-      {/* GRID */}
-      <motion.div
-        className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 max-w-7xl mx-auto"
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-      >
-        {menuItems.map((item) => {
-          const selected = type[item.id] || "Steam";
+        <motion.div
+          className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 max-w-7xl mx-auto"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
+          {menuItems.map((item) => {
+            const selected = type[item.id] || "Steam";
+            const momoType = getMomoType(item.name);
+            const isFried = selected === "Fried";
+            const price = BASE_PRICE[momoType] + (isFried ? 10 : 0);
+            const quantity = cart[item.id]?.quantity || 0;
 
-          /* DETECT TYPE */
-          const momoType = item.name.includes("Paneer")
-            ? "Paneer"
-            : item.name.includes("Soya")
-            ? "Soya"
-            : "Veg";
-
-          const price = PRICE_MAP[selected][momoType];
-
-          return (
-            <motion.div
-              key={item.id}
-              variants={fadeUpSmooth}
-              whileHover={{ y: -8 }}
-              transition={{ type: "spring", stiffness: 120 }}
-            >
-              <Card className="bg-zinc-900 border border-zinc-800 hover:border-orange-500 transition-all h-full">
-                {/* IMAGE */}
-                <div className="relative h-48 overflow-hidden">
+            return (
+              <motion.div key={item.id} variants={fadeUpSmooth}>
+                <Card className="bg-zinc-900 border border-zinc-800 rounded-2xl">
                   <img
                     src={momoImg}
                     alt={item.name}
-                    className="w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-500"
+                    className="w-full h-48 object-cover rounded-t-2xl"
                   />
 
-                  <span className="absolute top-3 right-3 bg-black/70 text-xs px-3 py-1 rounded-full text-orange-400">
-                    {selected}
-                  </span>
-                </div>
-
-                {/* CONTENT */}
-                <CardContent className="p-6 flex flex-col justify-between h-full">
-                  <div>
-                    <h3 className="text-xl font-semibold text-white">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold text-white">
                       {item.name}
                     </h3>
 
-                    <p className="text-zinc-400 mt-2 text-sm">
+                    <p className="text-zinc-400 text-sm mt-1">
                       {item.description}
                     </p>
 
-                    {/* STEAM / FRIED */}
                     <div className="flex gap-2 mt-4">
                       {["Steam", "Fried"].map((t) => (
                         <button
                           key={t}
-                          onClick={() => setType({ ...type, [item.id]: t })}
-                          className={`px-4 py-1.5 rounded-full text-xs border transition ${
+                          onClick={() =>
+                            setType((p) => ({ ...p, [item.id]: t }))
+                          }
+                          className={`px-4 py-1.5 rounded-full text-xs border ${
                             selected === t
-                              ? "bg-orange-500 text-black border-orange-500"
-                              : "border-zinc-700 text-zinc-400 hover:border-zinc-500"
+                              ? "bg-orange-500 text-black"
+                              : "border-zinc-700 text-zinc-400"
                           }`}
                         >
                           {t}
                         </button>
                       ))}
                     </div>
-                  </div>
 
-                  {/* PRICE */}
-                  <div className="flex justify-between items-center mt-6">
-                    <p className="text-orange-400 font-bold text-lg">
-                      ₹{price}
-                    </p>
-                    <span className="text-xs text-zinc-500">
-                      {selected} {momoType} Momos
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
-      </motion.div>
+                    <div className="flex items-center gap-4 mt-5">
+                      <button
+                        onClick={() =>
+                          changeQty(item, -1, price, momoType, selected)
+                        }
+                        className="px-3 py-1 border border-zinc-700 rounded"
+                      >
+                        −
+                      </button>
 
-      {/* EMPTY */}
-      {menuItems.length === 0 && (
-        <p className="text-zinc-500 mt-10 text-center">
-          Menu will be updated soon.
-        </p>
+                      <span className="text-white min-w-[20px] text-center">
+                        {quantity}
+                      </span>
+
+                      <button
+                        onClick={() =>
+                          changeQty(item, 1, price, momoType, selected)
+                        }
+                        className="px-3 py-1 border border-zinc-700 rounded"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="flex justify-between items-center mt-6 px-2">
+                  <p className="text-orange-400 font-bold">₹{price}</p>
+
+                  <button
+                    onClick={() =>
+                      changeQty(item, 1, price, momoType, selected)
+                    }
+                    className="bg-red-500 text-white text-sm px-6 py-2 rounded-full"
+                  >
+                    {quantity === 0 ? "Add" : "Add More"}
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </section>
+
+      {cartItems.length > 0 && (
+        <div className="fixed bottom-4 inset-x-0 px-4 z-50">
+          <Card className="max-w-4xl mx-auto bg-black border border-zinc-800">
+            <CardContent className="flex justify-between items-center py-4 px-6">
+              <p className="text-white text-sm">{cartItems.length} item(s)</p>
+              <p className="text-orange-400 font-bold">₹{total}</p>
+              <button
+                disabled={!canCheckout}
+                onClick={() => canCheckout && setOpenCart(true)}
+                className={`px-6 py-2 rounded-full text-sm font-semibold ${
+                  canCheckout
+                    ? "bg-green-500 text-black"
+                    : "bg-zinc-700 text-zinc-400"
+                }`}
+              >
+                Order Now
+              </button>
+            </CardContent>
+          </Card>
+        </div>
       )}
-    </section>
+      {openCart && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
+          <div className="w-[70vw] h-[70vh] bg-zinc-900 rounded-2xl p-6 flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-white">Your Order</h2>
+              <button
+                onClick={() => setOpenCart(false)}
+                className="text-zinc-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-2">
+              {cartItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between items-center py-4 border-b border-zinc-800"
+                >
+                  <div>
+                    <p className="text-white font-medium">{item.name}</p>
+                    <p className="text-xs text-zinc-400">
+                      {item.variant} · {item.momoType}
+                    </p>
+                    <p className="text-orange-400">₹{item.price}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() =>
+                        changeQty(
+                          { id: item.id, name: item.name },
+                          -1,
+                          item.price,
+                          item.momoType,
+                          item.variant
+                        )
+                      }
+                      className="px-2 py-1 border border-zinc-700 rounded"
+                    >
+                      −
+                    </button>
+                    <span className="text-white">{item.quantity}</span>
+                    <button
+                      onClick={() =>
+                        changeQty(
+                          { id: item.id, name: item.name },
+                          1,
+                          item.price,
+                          item.momoType,
+                          item.variant
+                        )
+                      }
+                      className="px-2 py-1 border border-zinc-700 rounded"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4 border-t border-zinc-800">
+              <div className="flex justify-between text-white font-semibold mb-4">
+                <span>Total</span>
+                <span>₹{total}</span>
+              </div>
+
+              <button
+                onClick={() => sendToWhatsApp(cartItems, total)}
+                className="w-full py-3 rounded-lg font-semibold bg-green-500 text-black"
+              >
+                Confirm Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
