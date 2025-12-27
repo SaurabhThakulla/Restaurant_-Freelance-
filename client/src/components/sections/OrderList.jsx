@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { menuItems } from "@/data/menu";

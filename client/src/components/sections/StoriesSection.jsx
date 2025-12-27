@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { reviews } from "@/data/reviews";
 import StarRating from "./StarRating";
