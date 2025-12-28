@@ -1,4 +1,4 @@
 export const BRAND = {
-  name: "Jhalpa Devi Momo",
+  name: "Jalpa Devi Momo",
   tagline: "Fresh • Hot • Street Style",
 };

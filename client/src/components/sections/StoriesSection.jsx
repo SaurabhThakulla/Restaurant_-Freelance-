@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
-import { reviews } from "@/data/reviews";
+import { useState, useEffect } from "react";
 import StarRating from "./StarRating";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,13 +13,48 @@ const item = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.8, 1, 0.8, 1] },
+    transition: { duration: 0.6 },
   },
 };
+
+const API_URL = "http://localhost:5000/api/reviews";
 
 export default function StoriesSection() {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(5);
+  const [reviews, setReviews] = useState([]);
+
+  const [name, setName] = useState("");
+  const [comment, setComment] = useState("");
+
+  /* FETCH REVIEWS */
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  function fetchReviews() {
+    fetch(API_URL)
+      .then((res) => res.json())
+      .then((data) => setReviews(data))
+      .catch((err) => console.error(err));
+  }
+
+  /* SUBMIT REVIEW */
+  async function submitReview() {
+    if (!name || !comment) return;
+
+    await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, comment, rating }),
+    });
+
+    setName("");
+    setComment("");
+    setRating(5);
+    setOpen(false);
+    fetchReviews();
+  }
 
   return (
     <section className="px-6 md:px-10 py-24 bg-[#0b0b0b]">
@@ -30,14 +64,13 @@ export default function StoriesSection() {
           className="text-3xl font-bold text-center text-white"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
         >
           What Customers Say
         </motion.h2>
 
         <button
           onClick={() => setOpen(true)}
-          className="mt-6 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full text-sm"
+          className="mt-6 bg-red-500 text-white px-6 py-3 rounded-full text-sm"
         >
           + Add Your Review
         </button>
@@ -52,9 +85,8 @@ export default function StoriesSection() {
       >
         {reviews.map((r) => (
           <motion.div
-            key={r.id}
+            key={r._id}
             variants={item}
-            whileHover={{ y: -6 }}
             className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800"
           >
             <StarRating rating={r.rating} />
@@ -64,22 +96,12 @@ export default function StoriesSection() {
         ))}
       </motion.div>
 
-      {/* REVIEW MODAL */}
+      {/* MODAL */}
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="bg-zinc-900 p-8 rounded-2xl w-full max-w-md border border-zinc-800"
-            >
-              <h3 className="text-xl font-semibold text-white mb-6">
+          <motion.div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <motion.div className="bg-zinc-900 p-8 rounded-2xl w-full max-w-md">
+              <h3 className="text-xl text-white mb-6">
                 Share your momo experience
               </h3>
 
@@ -98,19 +120,21 @@ export default function StoriesSection() {
                 ))}
               </div>
 
-              {/* FORM */}
               <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
-                className="w-full mb-3 bg-black border border-zinc-700 rounded-lg px-4 py-2 text-sm text-white"
+                className="w-full mb-3 bg-black border px-4 py-2 text-white"
               />
 
               <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
                 placeholder="Tell us about the momo taste..."
                 rows="4"
-                className="w-full bg-black border border-zinc-700 rounded-lg px-4 py-2 text-sm text-white"
+                className="w-full bg-black border px-4 py-2 text-white"
               />
 
-              {/* ACTIONS */}
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={() => setOpen(false)}
@@ -119,8 +143,8 @@ export default function StoriesSection() {
                   Cancel
                 </button>
                 <button
-                  onClick={() => setOpen(false)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full text-sm"
+                  onClick={submitReview}
+                  className="bg-red-500 text-white px-5 py-2 rounded-full text-sm"
                 >
                   Submit Review
                 </button>

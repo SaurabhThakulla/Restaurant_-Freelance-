@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { BRAND } from "@/config/brand";
 import { Button } from "@/components/ui/button";
-import momoImg from "@/assets/momo.jpg";
+import momoImg from "@/assets/main.jpg";
 
 export default function HeroSection() {
   return (
