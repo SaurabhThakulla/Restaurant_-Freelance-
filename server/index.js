@@ -3,29 +3,25 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-const reviewRoutes = require("./routes/reviewRoutes");
+const reviewRoutes = require("./routes/reviewRoute");
 
 const app = express();
 
-// ---------- MIDDLEWARE ----------
+/* MIDDLEWARE */
 app.use(cors());
 app.use(express.json());
 
-// ---------- ROUTES ----------
+/* ROUTES */
 app.use("/api/reviews", reviewRoutes);
 
-// ---------- TEST ----------
-app.get("/", (req, res) => {
-  res.send("Review API running 🚀");
-});
-
-// ---------- DB + SERVER ----------
-const PORT = process.env.PORT || 5000;
-
+/* DB CONNECT */
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected");
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => console.error(err));
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ DB error:", err));
+
+/* SERVER */
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
