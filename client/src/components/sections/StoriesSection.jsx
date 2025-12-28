@@ -17,7 +17,7 @@ const item = {
   },
 };
 
-const API_URL = "http://localhost:5000/api/reviews";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function StoriesSection() {
   const [open, setOpen] = useState(false);
@@ -26,11 +26,6 @@ export default function StoriesSection() {
 
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
-
-  /* FETCH REVIEWS */
-  useEffect(() => {
-    fetchReviews();
-  }, []);
 
   function fetchReviews() {
     fetch(API_URL)
@@ -55,6 +50,10 @@ export default function StoriesSection() {
     setOpen(false);
     fetchReviews();
   }
+  /* FETCH REVIEWS */
+  useEffect(() => {
+    fetchReviews();
+  }, []);
 
   return (
     <section className="px-6 md:px-10 py-24 bg-[#0b0b0b]">
