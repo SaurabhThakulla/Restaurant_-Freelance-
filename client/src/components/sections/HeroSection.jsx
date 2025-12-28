@@ -34,9 +34,9 @@ export default function HeroSection() {
 
           {/* BUTTONS */}
           <div className="flex gap-4 mt-10">
-            <Link href="/order">
+            <Link href="/stories">
               <Button className="bg-red-500 hover:bg-red-600 rounded-full px-8 py-6 text-base">
-                Order Now
+                About us
               </Button>
             </Link>
 

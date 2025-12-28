@@ -4,7 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { menuItems } from "@/data/menu";
 import { motion } from "framer-motion";
 import { fadeUpSmooth, staggerContainer } from "@/lib/animations";
-import momoImg from "@/assets/momo.jpg";
+import momoVegSteam from "@/assets/steamVeg.jpg";
+import momoSoyaSteam from "@/assets/steamSoya.jpg";
+import momoVegFried from "@/assets/momo.jpg";
+import momoSoyaFried from "@/assets/friedSoya.jpg";
+import momoPaneerFried from "@/assets/friedPanner.jpg";
 
 const BASE_PRICE = {
   Veg: 30,
@@ -23,6 +27,18 @@ export default function OrderList() {
     if (name.includes("Paneer")) return "Paneer";
     if (name.includes("Soya")) return "Soya";
     return "Veg";
+  }
+  function getMomoImage(momoType, variant) {
+    if (variant === "Steam") {
+      if (momoType === "Soya") return momoSoyaSteam;
+      return momoVegSteam; // Veg & default
+    }
+
+    // Fried
+    if (momoType === "Paneer") return momoPaneerFried;
+    if (momoType === "Soya") return momoSoyaFried;
+
+    return momoVegFried;
   }
 
   function sendToWhatsApp(cartItems, total) {
@@ -113,7 +129,7 @@ export default function OrderList() {
               <motion.div key={item.id} variants={fadeUpSmooth}>
                 <Card className="bg-zinc-900 border border-zinc-800 rounded-2xl">
                   <img
-                    src={momoImg}
+                    src={getMomoImage(momoType, selected)}
                     alt={item.name}
                     className="w-full h-48 object-cover rounded-t-2xl"
                   />
