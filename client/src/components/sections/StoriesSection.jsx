@@ -17,7 +17,7 @@ const item = {
   },
 };
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "https://restaurant-f37j.onrender.com/api/reviews";
 
 export default function StoriesSection() {
   const [open, setOpen] = useState(false);
