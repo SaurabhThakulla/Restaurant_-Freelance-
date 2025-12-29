@@ -12,7 +12,6 @@ This project allows customers to view and submit reviews in real time. It is bui
 - 📦 Order summary and cart management  
 - 🚚 End-to-end order handling flow from selection to delivery confirmation  
 - ⭐ Customers can add reviews with star ratings    
-- 🌐 Fully deployed full-stack application  
 - 📱 Responsive and modern UI  
 
 ---
